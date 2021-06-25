@@ -2,6 +2,15 @@ const calculatorDisplay = document.querySelector('h1');
 const inputBtns = document.querySelectorAll('button');
 const clearBtn = document.getElementById('clear-btn');
 
+// Calculate first and second values, depending on operator
+const calculate = {
+	'/': (firstNumber, secondNumber) => firstNumber / secondNumber,
+	'*': (firstNumber, secondNumber) => firstNumber * secondNumber,
+	'+': (firstNumber, secondNumber) => firstNumber + secondNumber,
+	'-': (firstNumber, secondNumber) => firstNumber - secondNumber,
+	'=': (firstNumber, secondNumber) => secondNumber,
+}
+
 let firstValue = 0;
 let operatorValue = '';
 let awaitingNextValue = false;
@@ -31,20 +40,34 @@ function addDecimal() {
 
 function useOperator(operator) {
 	const currentValue = Number(calculatorDisplay.textContent);
+	// Prevent multiple operators, will break out and not run the rest.
+	if (operatorValue && awaitingNextValue) {
+		// set operator value to whatever was last pressed. ie, press minus, but change mind to plus. and or equal to something else...
+		operatorValue = operator;
+		return;
+	}
 	//Assign firstValue if no first value
 	if (!firstValue) {
 		firstValue = currentValue;
 	} else {
-		console.log('current value', currentValue);
+		const calculation = calculate[operatorValue](firstValue, currentValue);
+		calculatorDisplay.textContent = calculation;
+		firstValue = calculation;
 	}
 	// Ready for next value, store operator
 	awaitingNextValue = true;
-
 	operatorValue = operator;
-	console.log('first value', firstValue);
-	console.log('operator', operator);
 }
 
+// Reset Display
+function resetAll() {
+	calculatorDisplay.textContent = '0';
+	firstValue = 0;
+	operatorValue = '';
+	awaitingNextValue = false;
+}
+
+// Event listeners
 // Add event listeners for numbers / operators and decimal btns
 inputBtns.forEach((inputBtn) => {
 	// Number btns
@@ -57,13 +80,4 @@ inputBtns.forEach((inputBtn) => {
 	}
 });
 
-// Reset Display
-function resetAll() {
-	calculatorDisplay.textContent = '0';
-	firstValue = 0;
-	operatorValue = '';
-	awaitingNextValue = false;
-}
-
-// Event listener
 clearBtn.addEventListener('click', resetAll);
